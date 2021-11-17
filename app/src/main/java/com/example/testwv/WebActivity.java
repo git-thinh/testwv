@@ -5,17 +5,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -35,15 +31,20 @@ public class WebActivity extends AppCompatActivity {
         webView.getSettings().setJavaScriptEnabled(true);
         //webView.loadUrl("https://dantri.com.vn/");
 
+        api = new JSInterface();
         webView.addJavascriptInterface(api, "api");
 
+       loadHtml();
+    }
+
+    void loadHtml(){
         String html = "";
         //readHtml("http://192.168.1.50:8080/");
         //html = "<h1>12345</h1>";
         OkHttpHandler handler = new OkHttpHandler();
         byte[] buf;
         try {
-            buf = handler.execute("http://192.168.1.50:8080/").get();
+            buf = handler.execute("http://192.168.1.50:8080/test.html").get();
             if (buf != null && buf.length > 0) {
                 html = new String(buf, StandardCharsets.UTF_8);
             }
@@ -51,7 +52,8 @@ public class WebActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Connect Failed", Toast.LENGTH_SHORT).show();
         }
 
-        webView.loadDataWithBaseURL("file:///android_asset/", html, "text/html", "utf-8", "");
+        //webView.loadDataWithBaseURL("file:///android_asset/", html, "text/html", "utf-8", "");
+        webView.loadData(html, "text/html", "UTF-8");
     }
 
     @Override
@@ -88,8 +90,12 @@ public class WebActivity extends AppCompatActivity {
 
     private class JSInterface {
         @JavascriptInterface
-        public void getString(String str) {
-            Log.d("STRING", str);
+        public void refresh() {
+            loadHtml();
+        }
+        @JavascriptInterface
+        public void toastShow(String str) {
+            Toast.makeText(getApplicationContext(), str, Toast.LENGTH_SHORT).show();
         }
     }
 
